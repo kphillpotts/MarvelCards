@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MarvelCards.MainPage"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:cards="clr-namespace:PanCardView;assembly=PanCardView"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="clr-namespace:MarvelCards.Views"
+    mc:Ignorable="d">
+
+    <Grid>
+        <cards:CardsView
+            x:Name="MainCardView"
+            IsCyclical="True"
+            ItemsSource="{Binding Heroes}">
+            <cards:CardsView.ItemTemplate>
+                <DataTemplate>
+                    <views:HeroCard />
+                </DataTemplate>
+            </cards:CardsView.ItemTemplate>
+
+        </cards:CardsView>
+    </Grid>
+
+</ContentPage>

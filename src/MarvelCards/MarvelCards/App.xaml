@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Application
+    x:Class="MarvelCards.App"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <Application.Resources>
+
+        <OnPlatform x:Key="HeaderFont" x:TypeArguments="x:String">
+            <On Platform="Android" Value="MontserratAlternates-Bold.ttf#MontserratAlternates-Bold" />
+            <On Platform="iOS" Value="MontserratAlternates-Bold" />
+        </OnPlatform>
+
+        <OnPlatform x:Key="BodyFont" x:TypeArguments="x:String">
+            <On Platform="Android" Value="MontserratAlternates-Medium.ttf#MontserratAlternates-Medium" />
+            <On Platform="iOS" Value="MontserratAlternates-Medium" />
+        </OnPlatform>
+
+
+        <Style x:Key="Header" TargetType="Label">
+            <Setter Property="FontFamily" Value="{StaticResource HeaderFont}" />
+            <Setter Property="FontSize" Value="60" />
+            <Setter Property="TextColor" Value="White" />
+        </Style>
+        <Style x:Key="SubHeader" TargetType="Label">
+            <Setter Property="FontFamily" Value="{StaticResource HeaderFont}" />
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="TextColor" Value="White" />
+        </Style>
+        <Style x:Key="LearnMore" TargetType="Label">
+            <Setter Property="FontFamily" Value="{StaticResource BodyFont}" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="TextColor" Value="#FFB854" />
+        </Style>
+
+        <Style TargetType="Grid">
+            <Setter Property="RowSpacing" Value="0" />
+            <Setter Property="ColumnSpacing" Value="0" />
+        </Style>
+
+        <Style TargetType="StackLayout">
+            <Setter Property="Spacing" Value="0" />
+        </Style>
+
+    </Application.Resources>
+</Application>
