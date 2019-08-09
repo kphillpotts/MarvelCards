@@ -27,12 +27,56 @@ namespace MarvelCards
         {
             base.OnAppearing();
             MainCardView.UserInteracted += MainCardView_UserInteracted;
+            MessagingCenter.Subscribe<CardEvent>(this, CardState.Expanded.ToString(), CardExpand);
+        }
+
+        private void CardExpand(CardEvent obj)
+        {
+            // turn off swipe interaction
+            MainCardView.IsUserInteractionEnabled = false;
+
+            // animate Title out
+            AnimateTitle(CardState.Expanded);
+        }
+
+        private void BackArrowTapGestureRecognizer_Tapped(object sender, EventArgs e)
+        {
+            // animate the title back in
+            AnimateTitle(CardState.Collapsed);
+
+            // tell the card to collapse
+            ((HeroCard)MainCardView.CurrentView).GoToState(CardState.Collapsed);
+
+            // re-enable swiping
+            MainCardView.IsUserInteractionEnabled = true;
+        }
+
+        private void AnimateTitle(CardState cardState)
+        {
+            var translationY = cardState == CardState.Expanded ? 0 - (MoviesHeader.Height + MoviesHeader.Margin.Top)  : 0;
+            var opacity = cardState == CardState.Expanded ? 0 : 1;
+
+            var animation = new Animation();
+            if (cardState == CardState.Expanded)
+            {
+                animation.Add(0.00, 0.25, new Animation(v => MoviesHeader.TranslationY = v, MoviesHeader.TranslationY, translationY));
+                animation.Add(0.00, 0.25, new Animation(v => MoviesHeader.Opacity = v, MoviesHeader.Opacity, opacity));
+            }
+            else
+            {
+                animation.Add(0.75, 1.00, new Animation(v => MoviesHeader.TranslationY = v, MoviesHeader.TranslationY, translationY));
+                animation.Add(0.75, 1.00, new Animation(v => MoviesHeader.Opacity = v, MoviesHeader.Opacity, opacity));
+            }
+
+            animation.Commit(this, "titleAnimation", 16, 1000);
+
         }
 
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
             MainCardView.UserInteracted -= MainCardView_UserInteracted;
+            MessagingCenter.Unsubscribe<CardEvent>(this, CardState.Expanded.ToString());
         }
 
 
@@ -48,6 +92,10 @@ namespace MarvelCards
 
                 // work out what percent the swipe is at
                 var percentFromCenter = Math.Abs(args.Diff / this.Width);
+
+                // adjust scale when panning
+                if ((percentFromCenter > 0) && (card.Scale == 1))
+                    card.ScaleTo(.95, 50);
 
                 // update elements based on swipe position
                 AnimateFrontCardDuringSwipe(card, percentFromCenter);
@@ -65,6 +113,7 @@ namespace MarvelCards
                 // at the end of dragging we need to make sure card is reset
                 var card = MainCardView.CurrentView as HeroCard;
                 AnimateFrontCardDuringSwipe(card, 0);
+                card.ScaleTo(1, 50);
             }
 
         }
@@ -97,5 +146,6 @@ namespace MarvelCards
             var offset = _heroImageTranslationY + (_movementFactor * (1-(percentFromCenter*1.1)));
             nextCard.MainImage.TranslationY = LimitToRange(offset, _heroImageTranslationY, _heroImageTranslationY + _movementFactor);
         }
+
     }
 }

@@ -34,6 +34,12 @@
             <Setter Property="FontSize" Value="20" />
             <Setter Property="TextColor" Value="#FFB854" />
         </Style>
+        <Style x:Key="TitleHeader" TargetType="Label">
+            <Setter Property="FontFamily" Value="{StaticResource BodyFont}" />
+            <Setter Property="FontSize" Value="26" />
+            <Setter Property="TextColor" Value="Black" />
+        </Style>
+
 
         <Style TargetType="Grid">
             <Setter Property="RowSpacing" Value="0" />

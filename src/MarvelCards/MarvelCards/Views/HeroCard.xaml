@@ -25,6 +25,7 @@
 
         <StackLayout Margin="40,400,40,30">
             <Label
+                x:Name="HeroNameLabel"
                 HorizontalOptions="Start"
                 LineHeight=".85"
                 Style="{StaticResource Header}"
@@ -32,16 +33,22 @@
                 VerticalOptions="Start"
                 WidthRequest="200" />
             <Label
+                x:Name="RealNameLabel"
                 HorizontalOptions="Start"
                 Style="{StaticResource SubHeader}"
                 Text="{Binding RealName}"
                 VerticalOptions="Start" />
             <Label
+                x:Name="LearnMoreLabel"
                 Margin="0,20,0,0"
                 HorizontalOptions="Start"
                 Style="{StaticResource LearnMore}"
                 Text="learn more ⟶"
-                VerticalOptions="Start" />
+                VerticalOptions="Start">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="LearnMoreTapGestureRecognizer_Tapped" />
+                </Label.GestureRecognizers>
+            </Label>
         </StackLayout>
     </Grid>
 </ContentView>

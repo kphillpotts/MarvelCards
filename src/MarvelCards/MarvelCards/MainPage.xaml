@@ -16,11 +16,29 @@
             ItemsSource="{Binding Heroes}">
             <cards:CardsView.ItemTemplate>
                 <DataTemplate>
-                    <views:HeroCard />
+                    <views:HeroCard Margin="0,0,0,-30" />
                 </DataTemplate>
             </cards:CardsView.ItemTemplate>
-
         </cards:CardsView>
+
+        <Label
+            x:Name="MoviesHeader"
+            Margin="20"
+            HorizontalOptions="Center"
+            Style="{StaticResource TitleHeader}"
+            Text="movies"
+            VerticalOptions="Start" />
+        <Image
+            x:Name="BackArrow"
+            Margin="40,30,0,0"
+            HorizontalOptions="Start"
+            Source="back_arrow"
+            VerticalOptions="Start">
+            <Image.GestureRecognizers>
+                <TapGestureRecognizer Tapped="BackArrowTapGestureRecognizer_Tapped" />
+            </Image.GestureRecognizers>
+        </Image>
+
     </Grid>
 
 </ContentPage>
