@@ -40,6 +40,12 @@
             <Setter Property="TextColor" Value="Black" />
         </Style>
 
+        <Style x:Key="BioText" TargetType="Label">
+            <Setter Property="FontFamily" Value="{StaticResource BodyFont}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="TextColor" Value="#716F6F" />
+        </Style>
+
 
         <Style TargetType="Grid">
             <Setter Property="RowSpacing" Value="0" />

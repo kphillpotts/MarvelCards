@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:d="http://xamarin.com/schemas/2014/forms/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:pancake="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
     xmlns:skia="clr-namespace:SkiaSharp.Views.Forms;assembly=SkiaSharp.Views.Forms"
     mc:Ignorable="d">
 
@@ -23,32 +24,81 @@
             VerticalOptions="Start"
             WidthRequest="400" />
 
-        <StackLayout Margin="40,400,40,30">
-            <Label
-                x:Name="HeroNameLabel"
-                HorizontalOptions="Start"
-                LineHeight=".85"
-                Style="{StaticResource Header}"
-                Text="{Binding HeroName}"
+        <Label
+            x:Name="LearnMoreLabel"
+            Margin="40,580,0,0"
+            HorizontalOptions="Start"
+            Style="{StaticResource LearnMore}"
+            Text="learn more ⟶"
+            VerticalOptions="Start">
+            <Label.GestureRecognizers>
+                <TapGestureRecognizer Tapped="LearnMoreTapGestureRecognizer_Tapped" />
+            </Label.GestureRecognizers>
+        </Label>
+
+        <Image
+            x:Name="MarvelLogoImage"
+            Margin="0,480,40,0"
+            HorizontalOptions="End"
+            Opacity="0"
+            Source="marvel_logo"
+            VerticalOptions="Start" />
+
+        <Grid
+            x:Name="HeroDetails"
+            Margin="0,0,0,40"
+            InputTransparent="True">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="530" />
+                <RowDefinition Height="*" />
+
+            </Grid.RowDefinitions>
+            <BoxView
+                x:Name="HeroDetailsDivider"
+                Grid.Row="1"
+                Margin="40,0,40,0"
+                HeightRequest="1"
+                Opacity="0"
                 VerticalOptions="Start"
-                WidthRequest="200" />
-            <Label
-                x:Name="RealNameLabel"
-                HorizontalOptions="Start"
-                Style="{StaticResource SubHeader}"
-                Text="{Binding RealName}"
-                VerticalOptions="Start" />
-            <Label
-                x:Name="LearnMoreLabel"
-                Margin="0,20,0,0"
-                HorizontalOptions="Start"
-                Style="{StaticResource LearnMore}"
-                Text="learn more ⟶"
-                VerticalOptions="Start">
-                <Label.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="LearnMoreTapGestureRecognizer_Tapped" />
-                </Label.GestureRecognizers>
-            </Label>
-        </StackLayout>
+                Color="#EAEAEA" />
+            <ScrollView
+                x:Name="HeroDetailsScroll"
+                Grid.Row="1"
+                Margin="40,20,40,0"
+                Opacity="0"
+                Orientation="Vertical">
+                <StackLayout>
+                    <Label Style="{StaticResource BioText}" Text="{Binding Bio}" />
+                    <BoxView
+                        Margin="0,20,0,0"
+                        HeightRequest="1"
+                        VerticalOptions="Start"
+                        Color="#EAEAEA" />
+                    <Label
+                        Style="{StaticResource SubHeader}"
+                        Text="movies"
+                        TextColor="Black" />
+                    <FlexLayout
+                        BindableLayout.ItemsSource="{Binding Posters}"
+                        HorizontalOptions="Fill"
+                        JustifyContent="SpaceEvenly"
+                        Wrap="Wrap">
+
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <pancake:PancakeView Margin="5" CornerRadius="20">
+                                    <Image Source="{Binding}" />
+                                </pancake:PancakeView>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+
+                    </FlexLayout>
+
+                </StackLayout>
+
+            </ScrollView>
+
+        </Grid>
+
     </Grid>
 </ContentView>

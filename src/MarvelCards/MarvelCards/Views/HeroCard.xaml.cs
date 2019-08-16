@@ -22,12 +22,22 @@ namespace MarvelCards.Views
         private CardState _cardState = CardState.Collapsed;
         private float _gradientHeight = 200f;
 
+        private static SKTypeface _typeface;
 
         // cached skia color and paint object
         SKColor _heroColor;
         SKPaint _heroPaint;
         private double _cardTopAnimPosition;
         private float _gradientTransitionY;
+
+        // font and label 
+        private SKPaint _heroNamePaint;
+        private float _heroNamePosY;
+        private float _heroNamePosX;
+        private SKPaint _realNamePaint;
+        private float _realNamePosY;
+        private float _realNameOffsetY;
+        private float _heroNameOffsetY;
 
         public HeroCard()
         {
@@ -36,6 +46,13 @@ namespace MarvelCards.Views
             _density = (float)Xamarin.Essentials.DeviceDisplay.MainDisplayInfo.Density;
             _cardTopMargin = 200f * _density;
             _cornerRadius = 30f * _density;
+
+            // load up the typeface, but just once
+            if (_typeface == null)
+            {
+                _typeface = DependencyService.Get<IFontAssetHelper>().GetSkiaTypefaceFromAssetFont("MontserratAlternates-Bold.ttf");
+            }
+
         }
 
         protected override void OnBindingContextChanged()
@@ -49,6 +66,25 @@ namespace MarvelCards.Views
             _heroColor = Color.FromHex(_viewModel.HeroColor).ToSKColor();
             _heroPaint = new SKPaint() { Color = _heroColor };
             _gradientTransitionY = float.MaxValue;
+
+            _heroNamePaint = new SKPaint()
+            {
+                Typeface = _typeface,
+                IsAntialias = true,
+                Color = SKColors.White,
+                TextSize = 60f * _density
+            };
+            _heroNamePosY = 450f * _density;
+            _heroNamePosX = 40f * _density;
+
+            _realNamePaint = new SKPaint()
+            {
+                Typeface = _typeface,
+                IsAntialias = true,
+                Color = SKColors.White,
+                TextSize = 25 * _density
+            };
+            _realNamePosY = 550f * _density;
 
             // setup initial values
             _cardTopAnimPosition = _cardTopMargin;
@@ -82,14 +118,8 @@ namespace MarvelCards.Views
                 _gradientTransitionY + _gradientHeight);
             // create the gradient
             var gradientPaint = new SKPaint() { Style = SKPaintStyle.Fill };
-            gradientPaint.Shader = SKShader.CreateLinearGradient
-                (
-                    start: new SKPoint(0, _gradientTransitionY),
-                    end: new SKPoint(0, _gradientTransitionY + _gradientHeight),
-                    colors: new SKColor[] { _heroColor, SKColors.White },
-                    colorPos: new float[] { 0, 1 },
-                    SKShaderTileMode.Clamp
-                );
+            gradientPaint.Shader = GetGradientShader(_heroColor, SKColors.White);
+
             // draw the gradient
             canvas.DrawRect(gradientRect, gradientPaint);
 
@@ -97,6 +127,48 @@ namespace MarvelCards.Views
             SKRect bottomRect = new SKRect(0, _gradientTransitionY + _gradientHeight,
                 info.Width, info.Height);
             canvas.DrawRect(bottomRect, new SKPaint() { Color = SKColors.White });
+
+            DrawHeroNameText(canvas);
+            DrawRealNameText(canvas);
+        }
+
+        private SKShader GetGradientShader (SKColor fromColor, SKColor toColor)
+        {
+            return SKShader.CreateLinearGradient
+                (
+                    start: new SKPoint(0, _gradientTransitionY),
+                    end: new SKPoint(0, _gradientTransitionY + _gradientHeight),
+                    colors: new SKColor[] { fromColor, toColor },
+                    colorPos: new float[] { 0, 1 },
+                    SKShaderTileMode.Clamp
+                );
+        }
+
+        private void DrawRealNameText(SKCanvas canvas)
+        {
+            var textPos = new SKPoint(_heroNamePosX, _realNamePosY + _realNameOffsetY);
+
+            // apply the gradient shader
+            _realNamePaint.Shader = GetGradientShader(SKColors.White, SKColors.Black);
+
+            canvas.DrawText(_viewModel.RealName, textPos, _realNamePaint);
+        }
+
+        private void DrawHeroNameText(SKCanvas canvas)
+        {
+            // apply the gradient shader
+            _heroNamePaint.Shader = GetGradientShader(SKColors.White, SKColors.Black);
+
+            // split our text
+            var textbits = _viewModel.HeroName.Split(' ');
+
+            for (int i = 0; i < textbits.Length; i++)
+            {
+                // get the position to draw the text
+                var textHeight = _heroNamePaint.TextSize;
+                var textPos = new SKPoint(_heroNamePosX, _heroNameOffsetY + _heroNamePosY + (i * textHeight));
+                canvas.DrawText(textbits[i], textPos, _heroNamePaint);
+            }
         }
 
         private void LearnMoreTapGestureRecognizer_Tapped(object sender, EventArgs e)
@@ -114,6 +186,7 @@ namespace MarvelCards.Views
             MessagingCenter.Send<CardEvent>(new CardEvent(), cardState.ToString());
             AnimateTransition(cardState);
             _cardState = cardState;
+            HeroDetails.InputTransparent = _cardState == CardState.Collapsed;
 
         }
 
@@ -129,6 +202,24 @@ namespace MarvelCards.Views
                 parentAnimation.Add(0.10, 0.50, CreateHeroNameAnimation(cardState));
                 parentAnimation.Add(0.15, 0.50, CreateRealNameAnimation(cardState));
                 parentAnimation.Add(0.50, 0.75, CreateGradientAnimation(cardState));
+
+                // animate in the details scroller
+                parentAnimation.Add(0.60, 0.85, new Animation((v) => HeroDetailsScroll.TranslationY = v,
+                    200, 0, Easing.SpringOut));
+                parentAnimation.Add(0.60, 0.85, new Animation((v) => HeroDetailsScroll.Opacity = v,
+                    0, 1, Easing.Linear));
+
+                // animate in the top bar
+                parentAnimation.Add(0.75, 0.85, new Animation((v) => HeroDetailsDivider.TranslationY = v,
+                    -20, 0, Easing.Linear));
+                parentAnimation.Add(0.75, 0.85, new Animation((v) => HeroDetailsDivider.Opacity = v,
+                    0, 1, Easing.Linear));
+
+                // animate in the marvel logo
+                parentAnimation.Add(0.6, 0.85, new Animation((v) => MarvelLogoImage.Scale = v,
+                        0, 1, Easing.SpringOut));
+                parentAnimation.Add(0.6, 0.85, new Animation((v) => MarvelLogoImage.Opacity = v,
+                    0, 1, Easing.Linear));
             }
             else
             {
@@ -138,7 +229,23 @@ namespace MarvelCards.Views
                 parentAnimation.Add(0.25, 0.45, CreateCardAnimation(cardState));
                 parentAnimation.Add(0.30, 0.50, CreateHeroNameAnimation(cardState));
                 parentAnimation.Add(0.25, 0.50, CreateRealNameAnimation(cardState));
-                
+
+                parentAnimation.Add(0.00, 0.35, new Animation((v) => HeroDetailsScroll.TranslationY = v,
+                        0, 200, Easing.SpringIn));
+                parentAnimation.Add(0.00, 0.35, new Animation((v) => HeroDetailsScroll.Opacity = v,
+                    1, 0, Easing.Linear));
+
+                // animate out the top bar
+                parentAnimation.Add(0.00, 0.10, new Animation((v) => HeroDetailsDivider.TranslationY = v,
+                    0, -20, Easing.Linear));
+                parentAnimation.Add(0.0, 0.10, new Animation((v) => HeroDetailsDivider.Opacity = v,
+                    1, 0, Easing.Linear));
+
+                // animate out the marvel logo
+                parentAnimation.Add(0.0, 0.15, new Animation((v) => MarvelLogoImage.Scale = v,
+                        1, 0, Easing.SpringIn));
+                parentAnimation.Add(0.0, 0.15, new Animation((v) => MarvelLogoImage.Opacity = v,
+                    1, 0, Easing.Linear));
             }
 
             parentAnimation.Commit(this, "CardExpand", 16, 2000);
@@ -172,9 +279,6 @@ namespace MarvelCards.Views
                 easing: Easing.Linear,
                 finished: () =>
                 {
-                    Color fontColor = cardState == CardState.Expanded ? Color.Black : Color.White;
-                    HeroNameLabel.TextColor = fontColor;
-                    RealNameLabel.TextColor = fontColor;
                 }
                 );
 
@@ -210,7 +314,8 @@ namespace MarvelCards.Views
             var imageAnim = new Animation(
                 v =>
                 {
-                    RealNameLabel.TranslationY = v;
+                    _realNameOffsetY = (float)v * _density;
+                    CardBackground.InvalidateSurface();
                 },
                 nameAnimationStart,
                 nameAnimationEnd,
@@ -229,7 +334,8 @@ namespace MarvelCards.Views
             var imageAnim = new Animation(
                 v =>
                 {
-                    HeroNameLabel.TranslationY = v;
+                    _heroNameOffsetY = (float)v * _density;
+                    CardBackground.InvalidateSurface();
                 },
                 nameAnimationStart,
                 nameAnimationEnd,
